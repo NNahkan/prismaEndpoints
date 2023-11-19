@@ -49,7 +49,7 @@ app.delete("/characters/:id", async (req, res) => {
 			prisma.character.delete({
 				where: {
 					id,
-				} 
+				}
 			})
 		)
 		.catch(() => null);
@@ -60,18 +60,50 @@ app.delete("/characters/:id", async (req, res) => {
 
 	return res.status(200).send("Great Success")
 });
-/* 
-app.post("/characters", (req, res) => {
-	characters.push(req.body);
-	res.status(201).send(req.body);
+app.post("/characters", async (req, res) => {
+	const body = req.body;
+	const name = body?.name;
+	if (typeof name !== "string") {
+		return res.status(400).send("Name must be a string")
+	}
+
+	try {
+		const newCharacter = await prisma.character.create({
+			data: {
+				name,
+			}
+		})
+		res.status(201).send(newCharacter);
+	} catch (e) {
+		console.error(e)
+		res.status(500)
+	}
+
 });
 
-app.patch(".characters/:id", (req, res) => {
+
+app.patch("/characters/:id", async (req, res) => {
 	const id = +req.params.id;
-	characters = characters.map((char) =>
-		char.id === id ? { ...char, ...req.body } : char
-	);
-	res.status(201).send(characters.find((char) => char.id));
+	const name = req.body?.name
+
+	if (typeof name !== "string") {
+		return res.status(400).send("Name must be a string")
+	}
+
+	try {
+		const updatedCharacter = await prisma.character.update({
+			where: {
+				id,
+			},
+			data: {
+				name,
+			}
+		})
+		res.status(201).send(updatedCharacter)
+	} catch (e) {
+		console.error("Name must be string!")
+		res.status(500)
+	}
 });
- */
+
 app.listen(3000);
